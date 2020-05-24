@@ -29,38 +29,35 @@ chrome.runtime.onMessage.addListener((msg, sender, response) => {
   }
 });
 
-async function clientBootCall(token, url, versionDataTs) {
-  let c = `----WebKitFormBoundary${Math.random().toString(36).substr(-8)}${Math.random().toString(36).substr(-8)}`,
-  	  d = [];
-  d.push(`--${c}`), 
-  d.push(`Content-Disposition: form-data; name="token"`), 
-  d.push(``), 
-  d.push(token), 
-  d.push(`--${c}`), 
-  d.push(`Content-Disposition: form-data; name="only_self_subteams"`), 
-  d.push(``), 
-  d.push(1), 
-  d.push(`--${c}`), 
-  d.push(`Content-Disposition: form-data; name="flannel_api_ver"`), 
-  d.push(``), 
-  d.push(4), 
-  d.push(`--${c}`), 
-  d.push(`Content-Disposition: form-data; name="include_min_version_bump_check"`), 
-  d.push(``), 
-  d.push(1), 
-  d.push(`--${c}`), 
-  d.push(`Content-Disposition: form-data; name="version_ts"`), 
-  d.push(``), 
-  d.push(versionDataTs), 
-  d.push(`--${c}`), 
-  d.push(`Content-Disposition: form-data; name="_x_reason"`), 
-  d.push(``), 
-  d.push(`deferred-data`), 
-  d.push(`--${c}`), 
-  d.push(`Content-Disposition: form-data; name="_x_sonic"`), 
-  d.push(``), 
-  d.push(true), 
+function bodyGenerator(bc){
+  let d = [],
+      c = `----WebKitFormBoundary${Math.random().toString(36).substr(-8)}${Math.random().toString(36).substr(-8)}`;
+
+  for (const key in bc) {
+    d.push(`--${c}`);
+    d.push(`Content-Disposition: form-data; name="${key}"`);
+    d.push(``);
+    d.push(bc[key]);
+  }
+
   d.push(`--${c}--`);
+
+  return {d, c}
+}
+
+async function clientBootCall(token, url, versionDataTs) {
+  let bc = {
+        'token': token,
+        'only_self_subteams': 1,
+        'flannel_api_ver': 4,
+        'include_min_version_bump_check': 1,
+        'version_ts': versionDataTs,
+        '_x_reason': 'deferred-data',
+        '_x_sonic': true
+      }
+
+  let {d, c} = bodyGenerator(bc)
+
   const e = await fetch(url+'api/client.boot?_x_id=noversion-1590265954.489&_x_version_ts=noversion&_x_gantry=true', {
     method: 'POST',
     credentials: "include",
@@ -69,5 +66,6 @@ async function clientBootCall(token, url, versionDataTs) {
     },
     body: d.join('\n')
   });
+
   return e.json()
 }
