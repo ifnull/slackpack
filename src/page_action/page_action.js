@@ -32,9 +32,11 @@ const setConversationHistory = data => {
 };
 
 const showStatus = ls => {
+  console.log(ls);
   let activeTeam = ls.teams[ls.activeTeam]
   let token = activeTeam.token;
   let url = activeTeam.url
+  let activeConversation = ls.activeConversation
   let versionDataTs = activeTeam.versionDataTs
   document.getElementById('debugger').innerHTML += "<strong>" + ls.activeTeam + "</strong><br>";
   document.getElementById('debugger').innerHTML += token + "<br>";
@@ -47,7 +49,7 @@ const showStatus = ls => {
     chrome.tabs.sendMessage(
       tabs[0].id, {
         from: 'slackpack-popup',
-        subject: 'boot',
+        subject: 'client.boot',
         context: {
           token,
           url,
@@ -63,6 +65,7 @@ const showStatus = ls => {
         context: {
           token,
           url,
+          activeConversation,
           versionDataTs,
         },
       },

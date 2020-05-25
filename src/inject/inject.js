@@ -10,13 +10,15 @@ chrome.extension.sendMessage({}, function(response) {
 chrome.runtime.onMessage.addListener((msg, sender, response) => {
   if ((msg.from === 'slackpack-popup') && (msg.subject === 'localstorage')) {
     let ls = JSON.parse(localStorage.getItem('localConfig_v2'));
-    ls.activeTeam = location.href.match(/https:\/\/app.slack.com\/client\/(T[A-Z0-9]+).*/)[1];
+    let appUrl = location.href.match(/https:\/\/app.slack.com\/client\/(T[A-Z0-9]+).*\/([A-Z0-9]+).*/);
+    ls.activeTeam = appUrl[1];
+    ls.activeConversation = appUrl[2];
     response(ls);
   }
 });
 
 chrome.runtime.onMessage.addListener((msg, sender, response) => {
-  if ((msg.from === 'slackpack-popup') && (msg.subject === 'boot')) {
+  if ((msg.from === 'slackpack-popup') && (msg.subject === 'client.boot')) {
     let clientBoot = clientBootCall(msg.context.token, msg.context.url, msg.context.versionDataTs);
     clientBoot.then(function(result) {
       console.log(result);
@@ -31,8 +33,8 @@ chrome.runtime.onMessage.addListener((msg, sender, response) => {
 
 chrome.runtime.onMessage.addListener((msg, sender, response) => {
   if ((msg.from === 'slackpack-popup') && (msg.subject === 'conversation.history')) {
-    let clientBoot = conversationHistoryCall(msg.context.token, msg.context.url, msg.context.versionDataTs);
-    clientBoot.then(function(result) {
+    let conversationHistory = conversationHistoryCall(msg.context.token, msg.context.url, msg.context.activeConversation, msg.context.versionDataTs);
+    conversationHistory.then(function(result) {
       console.log(result);
       response(result);
     }, function(err) {
@@ -91,9 +93,9 @@ function clientBootCall(token, url, versionDataTs) {
   return apiCall('client.boot', token, url, bc, versionDataTs);
 }
 
-async function conversationHistoryCall(token, url, versionDataTs) {
+function conversationHistoryCall(token, url, activeConversation, versionDataTs) {
   let bc = {
-    'channel': 'GSVHPMCRY',
+    'channel': activeConversation,
     'limit': 28,
     'ignore_replies': true,
     'include_pin_count': true,
