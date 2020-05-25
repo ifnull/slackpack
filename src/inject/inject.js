@@ -17,15 +17,29 @@ chrome.runtime.onMessage.addListener((msg, sender, response) => {
 
 chrome.runtime.onMessage.addListener((msg, sender, response) => {
   if ((msg.from === 'slackpack-popup') && (msg.subject === 'boot')) {
-  	let clientBoot = clientBootCall(msg.context.token, msg.context.url, msg.context.versionDataTs);
-	clientBoot.then(function(result) {
-		console.log(result);
-		response(result);
-	}, function(err) {
-		console.log(err);
-		response(false);
-	});
-	return true;
+    let clientBoot = clientBootCall(msg.context.token, msg.context.url, msg.context.versionDataTs);
+  clientBoot.then(function(result) {
+    console.log(result);
+    response(result);
+  }, function(err) {
+    console.log(err);
+    response(false);
+  });
+  return true;
+  }
+});
+
+chrome.runtime.onMessage.addListener((msg, sender, response) => {
+  if ((msg.from === 'slackpack-popup') && (msg.subject === 'conversation.history')) {
+    let clientBoot = conversationHistoryCall(msg.context.token, msg.context.url, msg.context.versionDataTs);
+  clientBoot.then(function(result) {
+    console.log(result);
+    response(result);
+  }, function(err) {
+    console.log(err);
+    response(false);
+  });
+  return true;
   }
 });
 
@@ -66,6 +80,79 @@ async function clientBootCall(token, url, versionDataTs) {
     },
     body: d.join('\n')
   });
-
   return e.json()
 }
+
+async function conversationHistoryCall(token, url, versionDataTs) {
+  let bc = {
+        'channel': 'GSVHPMCRY',
+        'limit': 28,
+        'ignore_replies': true,
+        'include_pin_count': true,
+        'inclusive': true,
+        'no_user_profile': true,
+        'token': token,
+        '_x_reason': 'message-pane/requestHistory',
+        '_x_mode': 'online',
+        '_x_sonic': true,
+      }
+
+    // messages = []
+    // lastTimestamp = None
+    // while(True):
+    //     response = pageableObject.history(
+    //         channel = channelId,
+    //         latest    = lastTimestamp,
+    //         oldest    = 0,
+    //         count     = pageSize
+    //     ).body
+
+    //     messages.extend(response['messages'])
+
+    //     if (response['has_more'] == True):
+    //         lastTimestamp = messages[-1]['ts'] # -1 means last element in a list
+    //         sleep(1) # Respect the Slack API rate limit
+    //     else:
+    //         break
+
+    // messages.sort(key = lambda message: message['ts'])
+    // return messages
+
+
+  let {d, c} = bodyGenerator(bc);
+  const e = await fetch(url+'api/conversations.history?_x_id=f328c0e5-1590365880.025&_x_csid=I1a_7Mglub0&slack_route=T024F6RA7&_x_version_ts=1590192872&_x_gantry=true', {
+    method: 'POST',
+    credentials: "include",
+    headers: {
+      "Content-type": `multipart/form-data; boundary=${c}`
+    },
+    body: d.join('\n')
+  });
+  return e.json()
+}
+
+// TODO
+// getHistory(pageableObject, channelId, pageSize = 100):
+// mkdir(directory):
+// parseTimeStamp( timeStamp ):
+// channelRename( oldRoomName, newRoomName ):
+// writeMessageFile( fileName, messages ):
+// parseMessages( roomDir, messages, roomType ):
+// filterConversationsByName(channelsOrGroups, channelOrGroupNames):
+// promptForPublicChannels(channels):
+// fetchPublicChannels(channels):
+// dumpChannelFile():
+// filterDirectMessagesByUserNameOrId(dms, userNamesOrIds):
+// promptForDirectMessages(dms):
+// fetchDirectMessages(dms):
+// promptForGroups(groups):
+// fetchGroups(groups):
+// getUserMap():
+// dumpUserFile():
+// doTestAuth():
+// bootstrapKeyValues():
+// selectConversations(allConversations, commandLineArg, filter, prompt):
+// anyConversationsSpecified():
+// dumpDummyChannel():
+// finalize():
+

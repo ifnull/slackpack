@@ -2,6 +2,7 @@ const setBoot = data => {
   console.log(data);
   channels = data.channels
   mpims = data.mpims
+  document.getElementById('debugger').innerHTML += "<h2>Channels and PMs</h2><br>";
 
   for (let i = 0; i < channels.length; i++) {
     document.getElementById('debugger').innerHTML += channels[i].name + "<br>";
@@ -12,6 +13,16 @@ const setBoot = data => {
   for (let i = 0; i < mpims.length; i++) {
     document.getElementById('debugger').innerHTML += mpims[i].name + "<br>";
   }  
+};
+
+const setConversationHistory = data => {
+  console.log(data);
+  let messages = data.messages;
+  document.getElementById('debugger').innerHTML += "<h2>Sample Conversation</h2><br>";
+  for (let i = 0; i < messages.length; i++) {
+    document.getElementById('debugger').innerHTML += messages[i].text + "<br>";
+  }  
+
 
 };
 
@@ -41,8 +52,22 @@ const showStatus = ls => {
       },
       setBoot
     );
+    chrome.tabs.sendMessage(
+      tabs[0].id,
+      {
+        from: 'slackpack-popup', 
+        subject: 'conversation.history', 
+        context: {
+          token,
+          url,
+          versionDataTs,
+        },
+      },
+      setConversationHistory
+    );
   });
 };
+
 
 window.addEventListener('DOMContentLoaded', () => {
   chrome.tabs.query({
