@@ -6,13 +6,13 @@ const setBoot = data => {
 
   for (let i = 0; i < channels.length; i++) {
     document.getElementById('debugger').innerHTML += channels[i].name + "<br>";
-  }  
-  
+  }
+
   document.getElementById('debugger').innerHTML += "<br>";
 
   for (let i = 0; i < mpims.length; i++) {
     document.getElementById('debugger').innerHTML += mpims[i].name + "<br>";
-  }  
+  }
 };
 
 const setConversationHistory = data => {
@@ -21,9 +21,14 @@ const setConversationHistory = data => {
   document.getElementById('debugger').innerHTML += "<h2>Sample Conversation</h2><br>";
   for (let i = 0; i < messages.length; i++) {
     document.getElementById('debugger').innerHTML += messages[i].text + "<br>";
-  }  
+  }
 
-
+  // var blob = new Blob(["array of", " parts of ", "text file"], {type: "text/plain"});
+  // var url = URL.createObjectURL(blob);
+  // chrome.downloads.download({
+  //   url: url // The object URL can be used as download URL
+  //   //...
+  // });  
 };
 
 const showStatus = ls => {
@@ -40,10 +45,9 @@ const showStatus = ls => {
     currentWindow: true
   }, tabs => {
     chrome.tabs.sendMessage(
-      tabs[0].id,
-      {
-        from: 'slackpack-popup', 
-        subject: 'boot', 
+      tabs[0].id, {
+        from: 'slackpack-popup',
+        subject: 'boot',
         context: {
           token,
           url,
@@ -53,10 +57,9 @@ const showStatus = ls => {
       setBoot
     );
     chrome.tabs.sendMessage(
-      tabs[0].id,
-      {
-        from: 'slackpack-popup', 
-        subject: 'conversation.history', 
+      tabs[0].id, {
+        from: 'slackpack-popup',
+        subject: 'conversation.history',
         context: {
           token,
           url,
@@ -75,13 +78,11 @@ window.addEventListener('DOMContentLoaded', () => {
     currentWindow: true
   }, tabs => {
     chrome.tabs.sendMessage(
-      tabs[0].id,
-      {
-         from: 'slackpack-popup', 
-         subject: 'localstorage'
+      tabs[0].id, {
+        from: 'slackpack-popup',
+        subject: 'localstorage'
       },
       showStatus
     );
   });
 });
-
